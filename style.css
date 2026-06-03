@@ -475,6 +475,7 @@ hashUL::-webkit-scrollbar {
     padding: 0.5rem 0.5rem;
     border-radius: 3rem;
     transition: all 0.2s ease-in-out;
+    color: white;
     border: none;
     width: fit-content;
     background: #ffffff1f;
@@ -485,7 +486,6 @@ hashUL::-webkit-scrollbar {
 }
 
 .info a {
-    color: white;
     text-decoration: none;
 }
 
