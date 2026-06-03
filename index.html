@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Taskly</title>
+        <link rel="shortcut icon" href="icon.svg" type="image/x-icon" />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+        />
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <!-- advent pro -->
+    <body>
+        <span class="modal hide_modal animate__animated" id="modal">
+            <h3>Add Task</h3>
+            <textarea
+                name="data"
+                id="data"
+                placeholder="Type something..."
+                rows="10"
+            ></textarea>
+            <input
+                type="datetime-local"
+                name="deadline"
+                id="deadline"
+                placeholder="Deadline"
+            />
+            <input type="text" placeholder="#something" name="tag" id="tag" />
+            <input
+                type="text"
+                placeholder="Category"
+                name="category"
+                id="modalCategory"
+                disabled
+            />
+            <div class="modalbtnWrapper">
+                <button id="addTaskBtn">
+                    <h1><i class="bi bi-plus"></i></h1>
+                </button>
+                <button id="modalClose">Close</button>
+            </div>
+        </span>
+        <span class="sidebar sidebar_close" id="sidebar">
+            <div class="sideBtnWrapper">
+                <button id="addCategory">
+                    <i class="bi bi-plus-lg"></i>&ThickSpace;Add Category
+                </button>
+            </div>
+            <div id="categories">
+                <ul id="ctgryUL"></ul>
+                <div id="addNew"></div>
+            </div>
+        </span>
+        <div class="container">
+            <div class="nav">
+                <div class="left">
+                    <button id="menu" class="muted">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <img src="logo.svg" alt="taskly" class="logo" />
+                </div>
+                <div class="right">
+                    <span id="addWrapper">
+                        <button id="addTask" class="muted">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                        <div class="collapse">
+                            <p class="animate__animated" id="addText">
+                                Add Task
+                            </p>
+                        </div>
+                    </span>
+                </div>
+            </div>
+            <div class="main_area">
+                <div class="filter_strip">
+                    <ul id="hashUL"></ul>
+                </div>
+                <hr />
+                <h3 class="taskHeading">Completed Tasks</h3>
+                <div id="completeGridArea"></div>
+                <hr />
+                <h3 class="taskHeading">Due Tasks</h3>
+                <div id="gridArea"></div>
+            </div>
+        </div>
+        <button id="delCat">
+            <i class="bi bi-trash3"></i>&ThickSpace;Category
+        </button>
+    </body>
+    <script src="index.js"></script>
+</html>
