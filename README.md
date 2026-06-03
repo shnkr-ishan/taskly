@@ -8,6 +8,12 @@ A clean, minimal task manager that runs entirely in the browser — no backend, 
 
 ---
 
+## Screenshot
+
+![Taskly App](screenshot.png)
+
+---
+
 ## Features
 
 - **Categories** — Organize tasks into custom categories; delete a category and all its tasks together
