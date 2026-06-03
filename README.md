@@ -1,4 +1,4 @@
-# Taskly ✓
+# Taskly
 
 A clean, minimal task manager that runs entirely in the browser — no backend, no accounts, no setup. Tasks and categories are persisted in `localStorage`, so your data stays across sessions.
 
