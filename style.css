@@ -471,11 +471,37 @@ hashUL::-webkit-scrollbar {
     font-size: 1rem;
 }
 
+.info {
+    padding: 0.5rem 0.5rem;
+    border-radius: 3rem;
+    transition: all 0.2s ease-in-out;
+    border: none;
+    width: fit-content;
+    background: #ffffff1f;
+    position: absolute;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    font-size: 1rem;
+}
+
+.info a {
+    color: white;
+    text-decoration: none;
+}
+
 #delCat:hover {
     transform: scale3d(1.05, 1.05, 1.05);
 }
 
 #delCat:active {
+    transform: scale3d(0.9, 0.9, 0.9);
+}
+
+.info:hover {
+    transform: scale3d(1.05, 1.05, 1.05);
+}
+
+.info:active {
     transform: scale3d(0.9, 0.9, 0.9);
 }
 
