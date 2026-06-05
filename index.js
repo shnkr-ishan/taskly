@@ -358,7 +358,10 @@ const compareDateAndTime = (date, time, id) => {
         } else if (currentTime[0] == todoTimeArray[0]) {
           if (currentTime[1] > todoTimeArray[1]) {
             return true;
-          } else if (currentTime[1] == todoTimeArray[1]) {
+          } else if (
+            parseInt(currentTime[1]) + 5 ==
+            parseInt(todoTimeArray[1])
+          ) {
             notify(id);
           }
         }
@@ -597,5 +600,6 @@ const routineCheck = async () => {
 };
 
 refreshBtn.onclick = () => {
+  checkIfOverdue();
   populateTasks();
 };
