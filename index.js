@@ -24,10 +24,16 @@ let gridArea = document.getElementById("gridArea");
 let delCat = document.getElementById("delCat");
 let hashUL = document.getElementById("hashUL");
 let completeGridArea = document.getElementById("completeGridArea");
+let refreshBtn = document.getElementById("refresh");
 
 const init = () => {
+  Notification.permission === "granted"
+    ? console.log("Notifications are enabled.")
+    : askNotificationPermission();
   setDate();
+  checkIfOverdue();
   firstTime();
+  setInterval(routineCheck, 60000);
 };
 
 if (document.readyState !== "loading") {
@@ -36,11 +42,31 @@ if (document.readyState !== "loading") {
   document.addEventListener("DOMContentLoaded", init);
 }
 
-const setDate = () => {
+const askNotificationPermission = async () => {
+  if (!("Notification" in window)) {
+    alert("This browser does not support desktop notifications.");
+    return;
+  }
+  const permission = await Notification.requestPermission();
+  if (permission === "granted") {
+    console.log("Notifications are enabled.");
+  } else {
+    console.log(
+      "Permission denied. Enable notifications for a better experience.",
+    );
+  }
+};
+
+const getCurrentDate = () => {
   let now = new Date();
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
   let formattedNow = now.toISOString().slice(0, 16);
-  document.getElementById("deadline").value = formattedNow;
+  return formattedNow;
+};
+
+const setDate = () => {
+  let currentDate = getCurrentDate();
+  document.getElementById("deadline").value = currentDate;
 };
 
 const randNum = () => {
@@ -210,6 +236,7 @@ setTaskToStorageBtn.onclick = () => {
       .map((item) => item.trim()),
     category: currentCategory,
     completed: false,
+    overdue: false,
   };
   setAllTasks();
   tasks.push(data);
@@ -226,6 +253,7 @@ setTaskToStorageBtn.onclick = () => {
     localStorage.setItem("hashArray", finalTempArray);
   }
   hideModal();
+  checkIfOverdue();
   populateTasks();
   populateHash();
 };
@@ -293,6 +321,53 @@ delCat.onclick = () => {
   populateHash();
 };
 
+const notify = (id) => {
+  setAllTasks();
+  let currentTask = tasks.filter((item) => item.id == id);
+  if (Notification.permission === "granted") {
+    let title = `${currentTask[0].title}`;
+    let options = {
+      body: "Reminder! Complete your task before its too late.",
+      icon: "icon.svg",
+      tag: `${id}`,
+    };
+    const notification = new Notification(title, options);
+    notification.onclick = () => {
+      window.focus();
+      notification.close();
+    };
+  }
+};
+
+const compareDateAndTime = (date, time, id) => {
+  let todoDateArray = date.split("-");
+  let todoTimeArray = time.split(":");
+  let currentDate = getCurrentDate().split("T")[0].split("-");
+  let currentTime = getCurrentDate().split("T")[1].split(":");
+  if (currentDate[0] > todoDateArray[0]) {
+    return true;
+  } else if (currentDate[0] == todoDateArray[0]) {
+    if (currentDate[1] > todoDateArray[1]) {
+      return true;
+    } else if (currentDate[1] == todoDateArray[1]) {
+      if (currentDate[2] > todoDateArray[2]) {
+        return true;
+      } else if (currentDate[2] == todoDateArray[2]) {
+        if (currentTime[0] > todoTimeArray[0]) {
+          return true;
+        } else if (currentTime[0] == todoTimeArray[0]) {
+          if (currentTime[1] > todoTimeArray[1]) {
+            return true;
+          } else if (currentTime[1] == todoTimeArray[1]) {
+            notify(id);
+          }
+        }
+      }
+    }
+  }
+  return false;
+};
+
 const populateTasks = () => {
   completeGridArea.innerHTML = "<p class='muted'>Nothing to show.</p>";
   setAllTasks();
@@ -305,17 +380,21 @@ const populateTasks = () => {
   let li = "";
   let li2 = "";
   tasks.forEach((e, i) => {
+    let todoDate = e.deadline.split("T")[0];
+    let todoTime = e.deadline.split("T")[1];
     if (e.category == currentCategory && !e.completed) {
-      for (let hash of e.hashtag) {
-        li += `<li class="muted"><small>#${hash}</small></li>`;
-      }
-      data += `<div class="todocard animate__animated animate__fadeInUp">
+      if (e.overdue) {
+        for (let hash of e.hashtag) {
+          li += `<li class="muted"><small>#${hash}</small></li>`;
+        }
+        data += `<div class="todocard overdue animate__animated animate__fadeInUp">
+          <span class="overdue_badge"><small>Overdue!</small></span>
           <ul class="hashtag">${li}</ul>
           <h2 class="todoTitle">${e.title}</h2>
           <hr/>
           <div class="todoDeadline">
-            <span><small><i class="bi bi-calendar"></i> ${e.deadline.split("T")[0]}</small></span>
-            <span><small><i class="bi bi-clock"></i> ${e.deadline.split("T")[1]}</small></span>
+            <span><small><i class="bi bi-calendar"></i> ${todoDate}</small></span>
+            <span><small><i class="bi bi-clock"></i> ${todoTime}</small></span>
           </div>
           <p class="todoCategory muted">${e.category}</p>
           <div class="cardBtnWrapper">
@@ -323,6 +402,25 @@ const populateTasks = () => {
             <button id="compTodo" onclick="completeTodo('${e.id}')"><i class="bi bi-check2-square"></i></button>
           </div>
         </div>`;
+      } else {
+        for (let hash of e.hashtag) {
+          li += `<li class="muted"><small>#${hash}</small></li>`;
+        }
+        data += `<div class="todocard animate__animated animate__fadeInUp">
+          <ul class="hashtag">${li}</ul>
+          <h2 class="todoTitle">${e.title}</h2>
+          <hr/>
+          <div class="todoDeadline">
+            <span><small><i class="bi bi-calendar"></i> ${todoDate}</small></span>
+            <span><small><i class="bi bi-clock"></i> ${todoTime}</small></span>
+          </div>
+          <p class="todoCategory muted">${e.category}</p>
+          <div class="cardBtnWrapper">
+            <button id="delTodo" onclick="deleteTodo('${e.id}')"><i class="bi bi-trash3"></i></button>
+            <button id="compTodo" onclick="completeTodo('${e.id}')"><i class="bi bi-check2-square"></i></button>
+          </div>
+        </div>`;
+      }
     }
     li = "";
     if (e.category == currentCategory && e.completed) {
@@ -334,8 +432,8 @@ const populateTasks = () => {
           <h2 class="todoTitle">${e.title}</h2>
           <hr/>
           <div class="todoDeadline">
-            <span><small><i class="bi bi-calendar"></i> ${e.deadline.split("T")[0]}</small></span>
-            <span><small><i class="bi bi-clock"></i> ${e.deadline.split("T")[1]}</small></span>
+            <span><small><i class="bi bi-calendar"></i> ${todoDate}</small></span>
+            <span><small><i class="bi bi-clock"></i> ${todoTime}</small></span>
           </div>
           <p class="todoCategory muted">${e.category}</p>
           <div class="cardBtnWrapper">
@@ -378,17 +476,21 @@ const filterTodo = (h) => {
     let li = "";
     let li2 = "";
     filteredArr.forEach((e, i) => {
+      let todoDate = e.deadline.split("T")[0];
+      let todoTime = e.deadline.split("T")[1];
       if (!e.completed) {
-        for (let hash of e.hashtag) {
-          li += `<li class="muted"><small>#${hash}</small></li>`;
-        }
-        data += `<div class="todocard animate__animated animate__fadeInUp">
+        if (e.overdue) {
+          for (let hash of e.hashtag) {
+            li += `<li class="muted"><small>#${hash}</small></li>`;
+          }
+          data += `<div class="todocard overdue animate__animated animate__fadeInUp">
+          <span class="overdue_badge"><small>Overdue!</small></span>
           <ul class="hashtag">${li}</ul>
           <h2 class="todoTitle">${e.title}</h2>
           <hr/>
           <div class="todoDeadline">
-            <span><small><i class="bi bi-calendar"></i> ${e.deadline.split("T")[0]}</small></span>
-            <span><small><i class="bi bi-clock"></i> ${e.deadline.split("T")[1]}</small></span>
+            <span><small><i class="bi bi-calendar"></i> ${todoDate}</small></span>
+            <span><small><i class="bi bi-clock"></i> ${todoTime}</small></span>
           </div>
           <p class="todoCategory muted">${e.category}</p>
           <div class="cardBtnWrapper">
@@ -396,6 +498,25 @@ const filterTodo = (h) => {
             <button id="compTodo" onclick="completeTodo('${e.id}')"><i class="bi bi-check2-square"></i></button>
           </div>
         </div>`;
+        } else {
+          for (let hash of e.hashtag) {
+            li += `<li class="muted"><small>#${hash}</small></li>`;
+          }
+          data += `<div class="todocard animate__animated animate__fadeInUp">
+          <ul class="hashtag">${li}</ul>
+          <h2 class="todoTitle">${e.title}</h2>
+          <hr/>
+          <div class="todoDeadline">
+            <span><small><i class="bi bi-calendar"></i> ${todoDate}</small></span>
+            <span><small><i class="bi bi-clock"></i> ${todoTime}</small></span>
+          </div>
+          <p class="todoCategory muted">${e.category}</p>
+          <div class="cardBtnWrapper">
+            <button id="delTodo" onclick="deleteTodo('${e.id}')"><i class="bi bi-trash3"></i></button>
+            <button id="compTodo" onclick="completeTodo('${e.id}')"><i class="bi bi-check2-square"></i></button>
+          </div>
+        </div>`;
+        }
       }
       li = "";
       if (e.completed) {
@@ -407,8 +528,8 @@ const filterTodo = (h) => {
           <h2 class="todoTitle">${e.title}</h2>
           <hr/>
           <div class="todoDeadline">
-            <span><small><i class="bi bi-calendar"></i> ${e.deadline.split("T")[0]}</small></span>
-            <span><small><i class="bi bi-clock"></i> ${e.deadline.split("T")[1]}</small></span>
+            <span><small><i class="bi bi-calendar"></i> ${todoDate}</small></span>
+            <span><small><i class="bi bi-clock"></i> ${todoTime}</small></span>
           </div>
           <p class="todoCategory muted">${e.category}</p>
           <div class="cardBtnWrapper">
@@ -444,10 +565,37 @@ const populateHash = () => {
 const completeTodo = (id) => {
   setAllTasks();
   let currentArray = tasks.filter((item) => item.id == id);
-  tasks = tasks.filter((item) => item.id != id);
+  let restArray = tasks.filter((item) => item.id != id);
   currentArray[0].completed = true;
-  let finalArray = tasks.concat(currentArray);
+  let finalArray = restArray.concat(currentArray);
   localStorage.setItem("tasks", JSON.stringify(finalArray));
   populateTasks();
   clearFilter(currentFilteredHash);
+};
+
+const checkIfOverdue = () => {
+  setAllTasks();
+  if (tasks != null || tasks != [] || tasks.length != 0) {
+    tasks.forEach((e, i) => {
+      let todoDate = e.deadline.split("T")[0];
+      let todoTime = e.deadline.split("T")[1];
+      if (compareDateAndTime(todoDate, todoTime, e.id)) {
+        if (!e.overdue) e.overdue = true;
+      }
+    });
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }
+};
+
+const routineCheck = async () => {
+  setAllTasks();
+  tasks.forEach((e, i) => {
+    let todoDate = e.deadline.split("T")[0];
+    let todoTime = e.deadline.split("T")[1];
+    compareDateAndTime(todoDate, todoTime, e.id);
+  });
+};
+
+refreshBtn.onclick = () => {
+  populateTasks();
 };

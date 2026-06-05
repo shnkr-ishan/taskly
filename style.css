@@ -131,6 +131,23 @@ button {
     transform: rotate(360deg);
 }
 
+#refresh {
+    background-color: transparent;
+    border: none;
+    border-radius: 3rem;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    padding: 0 0.5rem;
+}
+
+#refresh:hover {
+    color: #f9fafb;
+}
+
+#refresh:active {
+    transform: scale3d(0.9, 0.9, 0.9);
+}
+
 .container {
     display: flex;
     flex-direction: column;
@@ -175,6 +192,7 @@ button {
     flex-direction: column;
     flex: 1;
     overflow-y: auto;
+    scrollbar-width: none;
 }
 
 .sideBtnWrapper {
@@ -336,6 +354,8 @@ button {
     list-style: none;
     display: flex;
     gap: 1rem;
+    overflow-wrap: anywhere;
+    width: 60%;
 }
 
 .filter_strip {
@@ -345,6 +365,7 @@ button {
     padding: 0.5rem 1.5rem;
     position: sticky;
     top: 0;
+    gap: 1rem;
     background: linear-gradient(to right, #0f172a, #111d27);
     z-index: 1000;
 }
@@ -512,6 +533,17 @@ hashUL::-webkit-scrollbar {
 
 .overdue {
     background: linear-gradient(to right, #ff00002b, #ff00000d) !important;
+}
+
+.overdue_badge {
+    display: flex;
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    background: #7f2727;
+    padding: 5px 5px;
+    border-radius: 8px;
+    line-height: 1;
 }
 
 @media screen and (max-width: 768px) {
